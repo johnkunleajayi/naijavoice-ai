@@ -1,0 +1,11 @@
+# Keep downloaded model weights and generated audio out of this service.
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.wav
+models/
+model-cache/
+
+.test-tmp/

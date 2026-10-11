@@ -67,6 +67,33 @@ If `TTS_INFERENCE_URL` is empty, the existing lazy local F5-TTS adapter remains
 available; without configured local files it continues to return `503`.
 Tests isolate environment configuration and mock all remote HTTP requests.
 
+## VoxCPM2 remote deployment preparation
+
+The remote `/tts` host is intended to use the VoxCPM2 model
+`LyngualLabs/YorubaEnglish-CodeSwitching-TTS`. `TTS_REMOTE_MODEL_ID` records this
+deployment metadata, defaulting to that model ID. It does not load a local model
+or change the remote request schema. The inference host must configure the model;
+changing this setting alone does not switch a running remote service.
+
+Default voice asset settings:
+
+- `TTS_DEFAULT_VOICE_AUDIO_PATH`: `assets/voices/naijavoice_default_voice.wav`.
+- `TTS_DEFAULT_VOICE_TRANSCRIPT_PATH`: `assets/voices/naijavoice_default_voice.txt`.
+
+Defaults are absolute paths anchored to the backend directory. Environment
+overrides may be absolute or relative to backend/, regardless of working
+directory. The transcript is UTF-8 and should exactly match the reference audio.
+These settings describe assets for deployment; the HTTP adapter does not read,
+upload, or send local filesystem paths. Provision both files on the remote host
+and configure its VoxCPM2 reference voice there. No model downloads or inference
+are performed by this preparation.
+
+`POST /api/tts` and the upstream `POST /tts` contract remain unchanged.
+Remote inference remains primary when `TTS_INFERENCE_URL` is configured. Existing
+F5 code is retained for explicit local configuration only: there is no automatic
+F5 fallback on remote failure. Translation and diacritization are unchanged and
+continue to use the same inference URL.
+
 ## F5-TTS Yoruba adapter
 
 `F5TTSYorubaEngine` implements the engine contract for

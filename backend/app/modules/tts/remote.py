@@ -19,7 +19,7 @@ class RemoteTTSEngine:
         payload = json.dumps({"text": text}, ensure_ascii=False).encode("utf-8")
         try:
             with httpx.Client(
-                timeout=httpx.Timeout(120.0, connect=5.0, write=10.0, pool=5.0),
+                timeout=httpx.Timeout(300.0, connect=5.0, write=10.0, pool=5.0),
                 transport=self.transport,
                 follow_redirects=False,
             ) as client:

@@ -40,7 +40,7 @@ def test_normalized_utf8_json_and_exact_wav_passthrough():
         assert "ẹ ọ".encode("utf-8") in request.content
         assert request.headers["content-type"] == "application/json; charset=utf-8"
         assert request.headers["ngrok-skip-browser-warning"] == "true"
-        assert request.extensions["timeout"] == {"connect": 5.0, "read": 120.0, "write": 10.0, "pool": 5.0}
+        assert request.extensions["timeout"] == {"connect": 5.0, "read": 300.0, "write": 10.0, "pool": 5.0}
         return httpx.Response(200, content=audio, headers={"Content-Type": "audio/wav"})
 
     response = post_with_transport(handler)
