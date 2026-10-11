@@ -1,0 +1,4 @@
+# Optional: install only on the future inference host, not for API tests.
+-r requirements.txt
+f5-tts==1.1.22
+soundfile>=0.12,<1.0
