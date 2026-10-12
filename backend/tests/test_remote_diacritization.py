@@ -26,7 +26,8 @@ def endpoint(handler, text="Mo fe ko ede Yoruba daadaa"):
     return response, engine
 
 
-def test_unmarked_text_restored_then_normalized_and_sent_to_tts():
+@pytest.mark.parametrize("response_key", ["diacritized_text", "text"])
+def test_unmarked_text_restored_then_normalized_and_sent_to_tts(response_key):
     calls = []
 
     def handler(request):
@@ -38,7 +39,7 @@ def test_unmarked_text_restored_then_normalized_and_sent_to_tts():
         assert request.headers["accept"] == "application/json"
         assert request.headers["ngrok-skip-browser-warning"] == "true"
         assert request.extensions["timeout"]["read"] == 60.0
-        return httpx.Response(200, content=json.dumps({"text": RESTORED}, ensure_ascii=False).encode("utf-8"))
+        return httpx.Response(200, content=json.dumps({response_key: RESTORED}, ensure_ascii=False).encode("utf-8"))
 
     response, engine = endpoint(handler, "  Mo fe ko ede Yoruba daadaa  ")
     assert response.status_code == 200
@@ -139,3 +140,24 @@ def test_two_remote_calls_are_ordered_and_return_wav():
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/wav"
     assert response.content == audio
+
+
+@pytest.mark.parametrize("primary", [RESTORED, None, ""])
+def test_diacritized_text_precedence_and_legacy_fallback(primary):
+    legacy = "Legacy marked text."
+    response, engine = endpoint(lambda request: httpx.Response(
+        200, json={"diacritized_text": primary, "text": legacy}
+    ))
+    assert response.status_code == 200
+    expected = RESTORED + "." if primary else legacy
+    engine.synthesize.assert_called_once_with(text=expected, language="yo")
+
+
+@pytest.mark.parametrize("value", [None, 42, [], "", "   "])
+def test_invalid_diacritized_text_returns_clean_503(value):
+    response, engine = endpoint(lambda request: httpx.Response(
+        200, json={"diacritized_text": value}
+    ))
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Speech generation is not available yet."}
+    engine.synthesize.assert_not_called()

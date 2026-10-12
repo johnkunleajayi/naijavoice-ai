@@ -39,7 +39,7 @@ class RemoteYorubaDiacritizer:
             raise EngineUnavailableError("Invalid diacritization response") from exc
         if not isinstance(result, dict):
             raise EngineUnavailableError("Invalid diacritization response")
-        restored = result.get("text")
+        restored = result.get("diacritized_text") or result.get("text")
         if not isinstance(restored, str) or not restored.strip():
             raise EngineUnavailableError("Invalid restored text")
         return restored
