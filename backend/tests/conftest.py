@@ -10,6 +10,8 @@ def isolate_tts_environment(monkeypatch):
         monkeypatch.delenv(name, raising=False)
     # Override the configured .env URL to keep the entire suite offline.
     monkeypatch.setenv("TTS_INFERENCE_URL", "")
+    monkeypatch.setenv("TRANSLATION_INFERENCE_URL", "")
+    monkeypatch.setenv("DIACRITIZATION_INFERENCE_URL", "")
     get_tts_engine.cache_clear()
     yield
     get_tts_engine.cache_clear()

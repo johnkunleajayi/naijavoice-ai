@@ -37,7 +37,11 @@ class RemoteTranslationEngine:
             result = json.loads(response.content.decode("utf-8"))
         except ValueError as exc:
             raise TranslationUnavailableError("Invalid translation response") from exc
-        translated = result.get("text") if isinstance(result, dict) else None
+        translated = (
+            result.get("translated_text") or result.get("text")
+            if isinstance(result, dict)
+            else None
+        )
         if not isinstance(translated, str) or not translated.strip():
             raise TranslationUnavailableError("Invalid translated text")
         return translated

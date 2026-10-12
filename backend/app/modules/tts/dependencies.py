@@ -24,8 +24,8 @@ def get_tts_engine() -> TTSEngine:
 
 def get_yoruba_diacritizer() -> YorubaDiacritizer:
     settings = TTSSettings.from_env()
-    if settings.inference_url:
-        return RemoteYorubaDiacritizer(settings.inference_url)
+    if settings.diacritization_inference_url:
+        return RemoteYorubaDiacritizer(settings.diacritization_inference_url)
     return PassthroughYorubaDiacritizer()
 
 

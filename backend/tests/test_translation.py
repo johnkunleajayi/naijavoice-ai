@@ -88,14 +88,19 @@ def test_invalid_input_is_rejected_without_remote_call(payload):
     assert post_translation(handler, payload).status_code == 422
 
 
-def test_reuses_configured_inference_url(monkeypatch):
-    monkeypatch.setenv("TTS_INFERENCE_URL", "https://shared.example/")
+def test_translation_uses_its_own_url(monkeypatch):
+    monkeypatch.setenv("TTS_INFERENCE_URL", "https://tts.example/")
+    monkeypatch.setenv("DIACRITIZATION_INFERENCE_URL", "https://marks.example/")
+    monkeypatch.setenv("TRANSLATION_INFERENCE_URL", "https://translation.example/")
     service = get_translation_service()
     assert isinstance(service.engine, RemoteTranslationEngine)
-    assert service.engine.base_url == "https://shared.example"
+    assert service.engine.base_url == "https://translation.example"
 
 
-def test_missing_inference_url_returns_503():
+@pytest.mark.parametrize("url", ["", "   "])
+def test_missing_translation_url_never_falls_back_to_tts(monkeypatch, url):
+    monkeypatch.setenv("TTS_INFERENCE_URL", "https://tts.example")
+    monkeypatch.setenv("TRANSLATION_INFERENCE_URL", url)
     with TestClient(create_app()) as client:
         response = client.post("/api/translate", json={"text": ENGLISH})
     assert response.status_code == 503

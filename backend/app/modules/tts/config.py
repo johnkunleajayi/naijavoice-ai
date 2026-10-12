@@ -22,6 +22,7 @@ class TTSSettings:
     reference_audio_path: str = ""
     device: str = "cuda"
     inference_url: str = ""
+    diacritization_inference_url: str = ""
     # Deployment metadata: the remote host selects/loads the VoxCPM2 model.
     remote_model_id: str = DEFAULT_REMOTE_MODEL_ID
     default_voice_audio_path: Path = _VOICE_ROOT / "naijavoice_default_voice.wav"
@@ -41,6 +42,7 @@ class TTSSettings:
             vocab_path=os.getenv("TTS_VOCAB_PATH", "").strip(),
             reference_audio_path=os.getenv("TTS_REFERENCE_AUDIO_PATH", "").strip(),
             inference_url=os.getenv("TTS_INFERENCE_URL", "").strip(),
+            diacritization_inference_url=os.getenv("DIACRITIZATION_INFERENCE_URL", "").strip(),
             device=os.getenv("TTS_DEVICE", "cuda").strip() or "cuda",
         )
 

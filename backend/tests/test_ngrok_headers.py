@@ -10,7 +10,9 @@ from app.modules.tts.dependencies import get_tts_engine, get_yoruba_diacritizer
 @pytest.mark.parametrize("endpoint", ["tts", "diacritize", "translate"])
 def test_configured_ngrok_adapters_send_browser_warning_bypass(monkeypatch, endpoint):
     base_url = "https://trustless-episode-blank.ngrok-free.dev"
-    monkeypatch.setenv("TTS_INFERENCE_URL", base_url)
+    variable = {"tts": "TTS_INFERENCE_URL", "translate": "TRANSLATION_INFERENCE_URL",
+                "diacritize": "DIACRITIZATION_INFERENCE_URL"}[endpoint]
+    monkeypatch.setenv(variable, base_url)
     requests = []
     audio = b"RIFF" + b"1234" + b"WAVE" + b"test audio"
 

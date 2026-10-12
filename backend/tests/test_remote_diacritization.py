@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.main import create_app
 from app.modules.tts.dependencies import get_tts_engine, get_yoruba_diacritizer
+from app.modules.tts.diacritization import PassthroughYorubaDiacritizer
 from app.modules.tts.remote import RemoteTTSEngine
 from app.modules.tts.remote_diacritization import RemoteYorubaDiacritizer
 
@@ -92,10 +93,22 @@ def test_invalid_response_returns_clean_503_without_tts(body):
     engine.synthesize.assert_not_called()
 
 
-def test_shared_base_url_configuration(monkeypatch):
-    monkeypatch.setenv("TTS_INFERENCE_URL", "https://shared.example/")
-    assert get_yoruba_diacritizer().url == "https://shared.example/diacritize"
-    assert get_tts_engine().url == "https://shared.example/tts"
+def test_independent_base_url_configuration(monkeypatch):
+    monkeypatch.setenv("TTS_INFERENCE_URL", "https://tts.example/")
+    monkeypatch.setenv("TRANSLATION_INFERENCE_URL", "https://translation.example/")
+    monkeypatch.setenv("DIACRITIZATION_INFERENCE_URL", "https://marks.example/")
+    assert get_yoruba_diacritizer().url == "https://marks.example/diacritize"
+    assert get_tts_engine().url == "https://tts.example/tts"
+
+
+@pytest.mark.parametrize("url", ["", "   "])
+def test_missing_diacritization_url_never_falls_back_to_tts(monkeypatch, url):
+    monkeypatch.setenv("TTS_INFERENCE_URL", "https://tts.example/")
+    monkeypatch.setenv("DIACRITIZATION_INFERENCE_URL", url)
+    adapter = get_yoruba_diacritizer()
+    assert isinstance(adapter, PassthroughYorubaDiacritizer)
+    assert adapter.diacritize("Mo fe ko") == "Mo fe ko"
+    assert get_tts_engine().url == "https://tts.example/tts"
 
 
 def test_normalizes_restored_uppercase_whitespace_and_keeps_punctuation():
